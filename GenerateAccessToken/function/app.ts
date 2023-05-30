@@ -36,7 +36,7 @@ export const handler = async (
       statusCode: 500,
       body: JSON.stringify({
         code: 1,
-        errmsg: "Some error ocurred",
+        errmsg: error.message,
         result: [],
       }),
     };
