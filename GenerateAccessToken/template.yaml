@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  ExecuteStoredProcedure
+  GenerateAccessToken
 
-  Sample SAM Template for ExecuteStoredProcedure
+  Sample SAM Template for GenerateAccessToken
   
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -11,7 +11,7 @@ Globals:
     Timeout: 3
 
 Resources:
-  ExecuteStoredProcedureFunction:
+  GenerateAccessTokenFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: function/
@@ -19,12 +19,6 @@ Resources:
       Runtime: nodejs18.x
       Architectures:
         - x86_64
-      # Events:
-      #   ExecuteStoredProcedure:
-      #     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-      #     Properties:
-      #       Path: /hello
-      #       Method: get
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
@@ -38,12 +32,12 @@ Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  ExecuteStoredProcedureApi:
-    Description: "API Gateway endpoint URL for Prod stage for ExecuteStoredProcedure function"
+  GenerateAccessTokenApi:
+    Description: "API Gateway endpoint URL for Prod stage for Generate Access Token function"
     Value: !Sub "https://cls9taco80.execute-api.us-west-2.amazonaws.com/dev"
-  ExecuteStoredProcedureFunction:
-    Description: "ExecuteStoredProcedure Lambda Function ARN"
-    Value: !GetAtt ExecuteStoredProcedureFunction.Arn
-  ExecuteStoredProcedureFunctionIamRole:
-    Description: "Implicit IAM Role created for ExecuteStoredProcedure function"
-    Value: !GetAtt ExecuteStoredProcedureFunctionRole.Arn
+  GenerateAccessTokenFunction:
+    Description: "Generate Access Token Lambda Function ARN"
+    Value: !GetAtt GenerateAccessTokenFunction.Arn
+  GenerateAccessTokenFunctionIamRole:
+    Description: "Implicit IAM Role created for Generate Access Token function"
+    Value: !GetAtt GenerateAccessTokenFunctionRole.Arn
