@@ -1,16 +1,29 @@
 import jwt from "jsonwebtoken";
-import { ContextType } from "italki-clone-common";
 import { ACCESS_TOKEN_SECRET } from "./env";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from "aws-lambda";
 
 export const handler = async (
   event: APIGatewayProxyEvent,
-  context: ContextType
+  context: Context
 ): Promise<APIGatewayProxyResult> => {
   try {
     // Extract user information from the event payload or request parameters
     const { student_id, teacher_id } = JSON.parse(event.body as string);
 
+    if (!student_id && !teacher_id) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Bad request",
+          result: [],
+        }),
+      };
+    }
     // Generate the JWT token with the user information
     const access_token = jwt.sign(
       { student_id, teacher_id },
@@ -35,7 +48,7 @@ export const handler = async (
     return {
       statusCode: 500,
       body: JSON.stringify({
-        code: 1,
+        code: 0,
         errmsg: error.message,
         result: [],
       }),

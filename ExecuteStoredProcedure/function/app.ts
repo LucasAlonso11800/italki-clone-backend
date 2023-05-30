@@ -1,6 +1,6 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import mysql from 'mysql';
-import { BodyType, ContextType, ParamType, PATHS, internalAPICallDo } from 'italki-clone-common';
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import mysql from 'mysql2';
+import { BodyType, ParamType, PATHS, internalAPICallDo } from 'italki-clone-common';
 import { DB_HOST, DB_NAME, DB_PASSWORD, DB_USER } from './env';
 import { SPList } from './SPList';
 
@@ -11,7 +11,7 @@ const connection = mysql.createConnection({
     database: DB_NAME,
 });
 
-export const handler = async (event: APIGatewayProxyEvent, context: ContextType): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
     try {
         // Extract the JWT from the request headers
         const token = event.headers.Authorization;
@@ -20,7 +20,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: ContextType)
         const { procedure, params } = JSON.parse(event.body as string);
 
         const SP = SPList.find((sp) => sp.name === procedure);
-
+        
         if (!SP) {
             return {
                 statusCode: 404,
@@ -156,7 +156,7 @@ function connectToDatabase(): Promise<void> {
 
 function checkSPExists(procedure: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
-        connection.query(`SHOW PROCEDURE STATUS WHERE name = '${procedure}'`, (error, results) => {
+        connection.query(`SHOW PROCEDURE STATUS WHERE name = '${procedure}'`, (error, results: mysql.RowDataPacket[][]) => {
             if (error) {
                 reject(error);
             } else {
@@ -187,7 +187,7 @@ function callSP(
 
         const query = `CALL ${procedure}(${paramString}${authParams}, 1, "")`;
 
-        connection.query(query, (error, results) => {
+        connection.query(query, (error, results: mysql.RowDataPacket[][]) => {
             if (error) {
                 reject(error);
             } else {
