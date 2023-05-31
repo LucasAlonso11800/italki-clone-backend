@@ -1,6 +1,7 @@
 import {
     APIGatewayEventDefaultAuthorizerContext,
     APIGatewayProxyEventBase,
+    Context,
   } from "aws-lambda";
   import { handler } from "../../app";
   import jwt, { JwtPayload } from "jsonwebtoken";
@@ -16,7 +17,7 @@ import {
         }),
       } as APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>;
   
-      const context = {};
+      const context = {} as Context;
   
       const result = await handler(event, context);
   
@@ -44,7 +45,7 @@ import {
         }),
       } as APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>;
   
-      const context = {};
+      const context = {} as Context;
   
       const result = await handler(event, context);
   
@@ -73,7 +74,7 @@ import {
         }),
       } as APIGatewayProxyEventBase<APIGatewayEventDefaultAuthorizerContext>;
   
-      const context = {};
+      const context = {} as Context;
   
       // Simulate an error by throwing an exception
       jest.spyOn(JSON, "parse").mockImplementation(() => {
