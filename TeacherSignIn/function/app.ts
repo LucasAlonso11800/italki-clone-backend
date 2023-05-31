@@ -86,7 +86,7 @@ import {
           code: 1,
           errmsg: "",
           result: []
-        }),
+        })
       };
     } catch (error: any) {
       console.error(error);
