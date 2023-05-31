@@ -129,6 +129,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
             }),
         };
     } catch (error: any) {
+        console.error(error)
         // Close the database connection in case of error
         connection.end();
         return {

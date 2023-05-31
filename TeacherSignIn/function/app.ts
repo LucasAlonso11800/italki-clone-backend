@@ -89,13 +89,13 @@ import {
           ],
         }),
       };
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.error(error);
       return {
         statusCode: 500,
         body: JSON.stringify({
           code: 0,
-          errmsg: "Internal server error",
+          errmsg: error.message,
           result: [],
         })
       };

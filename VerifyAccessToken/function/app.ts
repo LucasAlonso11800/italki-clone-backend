@@ -1,9 +1,9 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { ACCESS_TOKEN_SECRET } from "./env";
-import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 
 export const handler = async (
-  event: APIGatewayEvent,
+  event: APIGatewayProxyEvent,
   context: Context
 ): Promise<APIGatewayProxyResult> => {
   try {
@@ -36,6 +36,7 @@ export const handler = async (
       }),
     };
   } catch (error: any) {
+    console.error(error)
     return {
       statusCode: 500,
       body: JSON.stringify({
