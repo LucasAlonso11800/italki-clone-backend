@@ -2,7 +2,7 @@ import {
     internalAPICallDo,
     PATHS,
   } from "italki-clone-common";
-  import bcrypt from "bcrypt";
+  import bcrypt from "bcryptjs";
   import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
   
   
