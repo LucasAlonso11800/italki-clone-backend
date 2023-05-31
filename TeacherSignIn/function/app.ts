@@ -78,15 +78,14 @@ import {
       // Return the JWT token
       return {
         statusCode: 200,
+        headers: {
+          access_token: generateJwtResponse.headers["token"],
+          refresh_token: generateRefreshTokenResponse.headers["token"],
+        },
         body: JSON.stringify({
           code: 1,
           errmsg: "",
-          result: [
-            {
-              access_token: generateJwtResponse.headers["token"],
-              refresh_token: generateRefreshTokenResponse.headers["token"],
-            },
-          ],
+          result: []
         }),
       };
     } catch (error: any) {
