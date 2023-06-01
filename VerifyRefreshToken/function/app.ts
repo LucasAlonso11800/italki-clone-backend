@@ -14,7 +14,6 @@ export const handler = async (
   try {
     // Retrieve the refresh token from the request
     const refreshToken = event.headers.Authorization as string;
-
     // Validate the refresh token
     const decodedToken = jwt.verify(
       refreshToken,
@@ -27,7 +26,20 @@ export const handler = async (
           code: 0,
           errmsg: "Invalid token",
           result: [],
-        })
+        }),
+      };
+    }
+
+    const noIDs = !decodedToken.student_id && !decodedToken.teacher_id;
+    const twoIDs = decodedToken.student_id && decodedToken.teacher_id;
+    if (noIDs || twoIDs) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Invalid token",
+          result: [],
+        }),
       };
     }
 
@@ -40,6 +52,19 @@ export const handler = async (
       }
     );
 
+    if (
+      generateJwtResponse.status !== 200 ||
+      generateJwtResponse.data.code !== 1
+    ) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Error generating access token",
+          result: [],
+        }),
+      };
+    }
     // Return success response with the new access token
     return {
       statusCode: 200,
@@ -54,12 +79,12 @@ export const handler = async (
       }),
     };
   } catch (error: any) {
-    console.error(error)
+    console.error(error);
     return {
-      statusCode: 500,
+      statusCode: 401,
       body: JSON.stringify({
         code: 0,
-        errmsg: error.message,
+        errmsg: "Invalid token",
         result: [],
       }),
     };
