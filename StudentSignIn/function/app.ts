@@ -65,6 +65,19 @@ export const handler = async (
       }
     );
 
+    if (
+      !generateJwtResponse.data ||
+      generateJwtResponse.data.code !== 1
+    ) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Error generating access token",
+          result: [],
+        })
+      };
+    }
     // Generate refresh token
     const generateRefreshTokenResponse = await internalAPICallDo(
       PATHS.auth.generate_refresh_token,
@@ -73,6 +86,19 @@ export const handler = async (
       }
     );
 
+    if (
+      !generateRefreshTokenResponse.data ||
+      generateRefreshTokenResponse.data.code !== 1
+    ) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Error generating refresh token",
+          result: [],
+        })
+      };
+    }
     // Return tokens
     return {
         statusCode: 200,

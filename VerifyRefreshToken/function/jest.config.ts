@@ -14,5 +14,5 @@ export default {
     testMatch: ['**/tests/unit/*.test.ts'],
     transformIgnorePatterns: [
         "!node_modules/"
-      ]
+    ]
 };
