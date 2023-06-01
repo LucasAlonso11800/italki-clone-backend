@@ -69,7 +69,11 @@ export const handler = async (
       }
     );
 
-    if (!generateJwtResponse.data || generateJwtResponse.data.code !== 1) {
+    if (
+      !generateJwtResponse.data ||
+      generateJwtResponse.data.code !== 1 ||
+      !generateJwtResponse.headers["token"]
+    ) {
       return {
         statusCode: 500,
         body: JSON.stringify({
@@ -90,7 +94,8 @@ export const handler = async (
 
     if (
       !generateRefreshTokenResponse.data ||
-      generateRefreshTokenResponse.data.code !== 1
+      generateRefreshTokenResponse.data.code !== 1 ||
+      !generateRefreshTokenResponse.headers["token"]
     ) {
       return {
         statusCode: 500,

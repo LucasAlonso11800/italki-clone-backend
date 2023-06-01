@@ -39,11 +39,11 @@ export const handler = async (
       };
     }
 
-    // Check if the birthdate is at least 12 years ago
+    // Check if the birthdate is at least 18 years ago
     const currentDate = new Date();
-    const twelveYearsAgo = new Date();
-    twelveYearsAgo.setFullYear(currentDate.getFullYear() - 12);
-    if (new Date(birthdate) > twelveYearsAgo) {
+    const min = new Date();
+    min.setFullYear(currentDate.getFullYear() - 18);
+    if (!birthdate || new Date(birthdate) > min) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -163,6 +163,22 @@ export const handler = async (
         student_id: student_id,
       }
     );
+
+    if (
+      !generateJwtResponse.data ||
+      generateJwtResponse.data.code !== 1 ||
+      !generateJwtResponse.headers["access_token"]
+    ) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Error generating access token",
+          result: [],
+        }),
+      };
+    }
+
     // Generate refresh token
     const generateRefreshTokenResponse = await internalAPICallDo(
       PATHS.auth.generate_refresh_token,
@@ -170,12 +186,26 @@ export const handler = async (
         student_id: student_id,
       }
     );
+    if (
+      !generateRefreshTokenResponse.data ||
+      generateRefreshTokenResponse.data.code !== 1 || 
+      !generateRefreshTokenResponse.headers["refresh_token"]
+    ) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Error generating refresh token",
+          result: [],
+        }),
+      };
+    }
     // Return the tokens
     return {
       statusCode: 200,
       headers: {
-          access_token: generateJwtResponse.headers["token"],
-          refresh_token: generateRefreshTokenResponse.headers["token"],
+          access_token: generateJwtResponse.headers["access_token"],
+          refresh_token: generateRefreshTokenResponse.headers["refresh_token"],
       },
       body: JSON.stringify({
         code: 1,
