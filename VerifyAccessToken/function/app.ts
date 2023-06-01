@@ -11,7 +11,9 @@ export const handler = async (
 
     const decodedToken = jwt.verify(token, ACCESS_TOKEN_SECRET) as JwtPayload;
 
-    if (!decodedToken) {
+    const noIDs = !decodedToken.student_id && !decodedToken.teacher_id;
+    const twoIDs = decodedToken.student_id && decodedToken.teacher_id;
+    if (noIDs || twoIDs) {
       return {
         statusCode: 401,
         body: JSON.stringify({
@@ -38,10 +40,10 @@ export const handler = async (
   } catch (error: any) {
     console.error(error)
     return {
-      statusCode: 500,
+      statusCode: 401,
       body: JSON.stringify({
         code: 0,
-        errmsg: error.message,
+        errmsg: "Invalid token",
         result: [],
       }),
     };
