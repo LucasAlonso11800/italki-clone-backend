@@ -1,7 +1,11 @@
 import bcrypt from "bcryptjs";
-import { internalAPICallDo,PATHS } from "italki-clone-common";
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
-  
+import { internalAPICallDo, PATHS } from "italki-clone-common";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyResult,
+  Context,
+} from "aws-lambda";
+
 export const handler = async (
   event: APIGatewayProxyEvent,
   context: Context
@@ -18,14 +22,14 @@ export const handler = async (
           code: 0,
           errmsg: "Email and password are required",
           result: [],
-        })
+        }),
       };
     }
 
     // Check if the student exists
     const studentCheckResponse = await internalAPICallDo(PATHS.services, {
       procedure: "StudentCheck",
-      params: [email]
+      params: [email],
     });
 
     if (
@@ -39,7 +43,7 @@ export const handler = async (
           code: 0,
           errmsg: "Invalid credentials",
           result: [],
-        })
+        }),
       };
     }
 
@@ -53,7 +57,7 @@ export const handler = async (
           code: 0,
           errmsg: "Invalid credentials",
           result: [],
-        })
+        }),
       };
     }
 
@@ -65,17 +69,14 @@ export const handler = async (
       }
     );
 
-    if (
-      !generateJwtResponse.data ||
-      generateJwtResponse.data.code !== 1
-    ) {
+    if (!generateJwtResponse.data || generateJwtResponse.data.code !== 1) {
       return {
         statusCode: 500,
         body: JSON.stringify({
           code: 0,
           errmsg: "Error generating access token",
           result: [],
-        })
+        }),
       };
     }
     // Generate refresh token
@@ -96,21 +97,21 @@ export const handler = async (
           code: 0,
           errmsg: "Error generating refresh token",
           result: [],
-        })
+        }),
       };
     }
     // Return tokens
     return {
-        statusCode: 200,
-        headers: {
-          access_token: generateJwtResponse.headers["token"],
-          refresh_token: generateRefreshTokenResponse.headers["token"],
-        },
-        body: JSON.stringify({
-          code: 1,
-          errmsg: "",
-          result: []
-        }),
+      statusCode: 200,
+      headers: {
+        access_token: generateJwtResponse.headers["token"],
+        refresh_token: generateRefreshTokenResponse.headers["token"],
+      },
+      body: JSON.stringify({
+        code: 1,
+        errmsg: "",
+        result: [],
+      }),
     };
   } catch (error: any) {
     console.log(error);
@@ -120,7 +121,7 @@ export const handler = async (
         code: 0,
         errmsg: error.message,
         result: [],
-      })
+      }),
     };
   }
 };
