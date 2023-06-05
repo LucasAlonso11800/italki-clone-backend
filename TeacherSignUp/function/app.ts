@@ -63,7 +63,7 @@ export const handler = async (
     const currentDate = new Date();
     const eighteenYearsAgo = new Date();
     eighteenYearsAgo.setFullYear(currentDate.getFullYear() - 18);
-    if (new Date(birthdate) > eighteenYearsAgo) {
+    if (!birthdate || new Date(birthdate) > eighteenYearsAgo) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -201,6 +201,17 @@ export const handler = async (
         }),
       };
     }
+    // Check if languages are valid
+    if (!languages) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Invalid value for languages",
+          result: [],
+        }),
+      };
+    }
 
     // Transform the languages array into two strings with the ids separated by ";"
     const languageIds = languages
@@ -260,7 +271,7 @@ export const handler = async (
         statusCode: 500,
         body: JSON.stringify({
           code: 0,
-          errmsg: "Failed to retrieve teacher",
+          errmsg: "Failed to retrieve teacher ID",
           result: [],
         }),
       };
@@ -276,6 +287,21 @@ export const handler = async (
       }
     );
 
+    
+    if (
+      !generateJwtResponse.data ||
+      generateJwtResponse.data.code !== 1 ||
+      !generateJwtResponse.headers["access_token"]
+    ) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Error generating access token",
+          result: [],
+        }),
+      };
+    }
     // Generate refresh token
     const generateRefreshTokenResponse = await internalAPICallDo(
       PATHS.auth.generate_refresh_token,
@@ -283,18 +309,32 @@ export const handler = async (
         teacher_id,
       }
     );
+    if (
+      !generateRefreshTokenResponse.data ||
+      generateRefreshTokenResponse.data.code !== 1 || 
+      !generateRefreshTokenResponse.headers["refresh_token"]
+    ) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Error generating refresh token",
+          result: [],
+        }),
+      };
+    }
     // Return the JWT token
     return {
       statusCode: 200,
       headers: {
-        access_token: generateJwtResponse.headers["token"],
-        refresh_token: generateRefreshTokenResponse.headers["token"],
+        access_token: generateJwtResponse.headers["access_token"],
+        refresh_token: generateRefreshTokenResponse.headers["refresh_token"],
       },
       body: JSON.stringify({
         code: 1,
         errmsg: "",
-        result: []
-      })
+        result: [],
+      }),
     };
   } catch (error: any) {
     console.error(error);
