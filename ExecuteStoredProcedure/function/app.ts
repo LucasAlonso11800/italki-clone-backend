@@ -14,13 +14,15 @@ const connection = mysql.createConnection({
 export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
     try {
         // Extract the JWT from the request headers
-        const token = event.headers.Authorization;
-
+        const token = event.headers.authorization;
+        console.log('event.headers.authorization', token)
         // Retrieve the stored procedure name and parameters from the event
         const { procedure, params } = JSON.parse(event.body as string);
+        console.log('procedure', procedure)
+        console.log('params', params)
 
         const SP = SPList.find((sp) => sp.name === procedure);
-        
+        console.log('SP', SP)
         if (!SP) {
             return {
                 statusCode: 404,
@@ -40,10 +42,10 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
                 PATHS.auth.verify_access_token,
                 {},
                 {
-                    Authorization: token,
+                    authorization: token,
                 },
             );
-
+            console.log('authResponse', authResponse)
             if (authResponse.status !== 200 || authResponse.data.code !== 1 || authResponse.data.result.length === 0) {
                 return {
                     statusCode: 401,

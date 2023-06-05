@@ -13,7 +13,8 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     // Retrieve the refresh token from the request
-    const refreshToken = event.headers.Authorization as string;
+    const refreshToken = event.headers.authorization as string;
+    console.log('event.headers.authorization', refreshToken)
     // Validate the refresh token
     const decodedToken = jwt.verify(
       refreshToken,
@@ -51,10 +52,11 @@ export const handler = async (
         teacher_id: decodedToken.teacher_id,
       }
     );
-
+    console.log('generateJwtResponse', generateJwtResponse)
     if (
       generateJwtResponse.status !== 200 ||
-      generateJwtResponse.data.code !== 1
+      generateJwtResponse.data.code !== 1 || 
+      !generateJwtResponse.headers['access_token']
     ) {
       return {
         statusCode: 500,
@@ -69,7 +71,7 @@ export const handler = async (
     return {
       statusCode: 200,
       headers: {
-        access_token: generateJwtResponse.headers["token"],
+        access_token: generateJwtResponse.headers["access_token"],
         refresh_token: refreshToken,
       },
       body: JSON.stringify({

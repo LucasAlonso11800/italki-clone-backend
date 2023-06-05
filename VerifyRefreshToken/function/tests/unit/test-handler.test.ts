@@ -142,7 +142,7 @@ describe("Lambda Function Tests", () => {
         ({
           status: 200,
           headers: {
-            token: "access_token",
+            access_token: "access_token",
           },
           data: {
             code: 1,

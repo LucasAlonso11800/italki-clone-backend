@@ -7,10 +7,12 @@ export const handler = async (
   context: Context
 ): Promise<APIGatewayProxyResult> => {
   try {
-    const token = event.headers.Authorization as string;
+    const token = event.headers.authorization as string;
+    console.log('event.headers.authorization', token)
 
     const decodedToken = jwt.verify(token, ACCESS_TOKEN_SECRET) as JwtPayload;
-
+    console.log('decodedToken', decodedToken)
+    
     if (!decodedToken) {
       return {
         statusCode: 401,
