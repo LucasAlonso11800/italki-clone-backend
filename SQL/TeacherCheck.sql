@@ -3,21 +3,27 @@ CREATE DEFINER=`root`@`%` PROCEDURE `TeacherCheck`(
 	OUT Rcode int,
     OUT Rmessage varchar(100)
 )
-BEGIN
+SP:BEGIN
 
 DECLARE EXIT HANDLER FOR SQLEXCEPTION
 BEGIN
 	GET DIAGNOSTICS CONDITION 1
     Rmessage = MESSAGE_TEXT;
-    SET RCode := 0;
+    SET Rcode := 0;
 	ROLLBACK;
 END;
 
-SET RCode := 1;
+SET Rcode := 1;
 SET Rmessage := NULL;
 
 SELECT 	teacher_id
 FROM	teachers
 WHERE	teacher_email = Pemail;
+
+IF FOUND_ROWS() = 0 THEN
+	SET Rcode := 0;
+	SET Rmessage := "Not found";
+    LEAVE SP;
+END IF;
 
 END

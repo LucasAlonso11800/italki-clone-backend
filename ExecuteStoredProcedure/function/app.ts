@@ -6,7 +6,6 @@ import {
 import mysql from "mysql2";
 import {
   BodyType,
-  ParamType,
   PATHS,
   internalAPICallDo,
 } from "italki-clone-common";
@@ -14,12 +13,7 @@ import { DB_HOST, DB_NAME, DB_PASSWORD, DB_USER } from "./env";
 import { SPList } from "./SPList";
 import { buildParams } from "./utils";
 
-const connection = mysql.createConnection({
-  host: DB_HOST,
-  user: DB_USER,
-  password: DB_PASSWORD,
-  database: DB_NAME,
-});
+let connection: mysql.Connection;
 
 export const handler = async (
   event: APIGatewayProxyEvent,
@@ -99,6 +93,13 @@ export const handler = async (
       }
     }
     // Connect to the database
+    connection = mysql.createConnection({
+      host: DB_HOST,
+      user: DB_USER,
+      password: DB_PASSWORD,
+      database: DB_NAME,
+    });
+    
     await connectToDatabase();
 
     // Check if the stored procedure exists
@@ -175,11 +176,23 @@ function connectToDatabase(): Promise<void> {
   });
 }
 
+async function mysqlQuery<T>(query: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    connection.query(query, (error: any, results: T) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+}
+
 function checkSPExists(procedure: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
     connection.query(
       `SHOW PROCEDURE STATUS WHERE name = '${procedure}'`,
-      (error, results: mysql.RowDataPacket[][]) => {
+      (error, results: mysql.RowDataPacket[]) => {
         if (error) {
           reject(error);
         } else {
@@ -190,21 +203,31 @@ function checkSPExists(procedure: string): Promise<boolean> {
   });
 }
 
-function callSP(procedure: string, params: string): Promise<BodyType<any>> {
-  return new Promise((resolve, reject) => {
-    const query = `CALL ${procedure}(${params})`;
-    console.log("MYSQL query", query);
-
-    connection.query(query, (error, results: mysql.RowDataPacket[][]) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve({
-          code: results[0][0].code,
-          errmsg: results[0][0].errmsg,
-          result: results[1],
-        });
-      }
-    });
-  });
+async function callSP(
+  procedure: string,
+  params: string
+): Promise<BodyType<any>> {
+  try {
+    const SPQuery = `CALL ${procedure}(${params})`;
+    console.log("MYSQL SPQuery", SPQuery);
+    const outParamsQuery = `SELECT @Rcode as 'code', @Rmessage as 'message'`;
+    const SPQueryResults = await mysqlQuery<mysql.RowDataPacket[][]>(SPQuery);
+    console.log("SPQueryResults", SPQueryResults);
+    const outParamsQueryResults = await mysqlQuery<mysql.RowDataPacket[]>(
+      outParamsQuery
+    );
+    console.log("outParamsQueryResults", outParamsQueryResults);
+    return {
+      code: outParamsQueryResults[0].code,
+      errmsg: outParamsQueryResults[0].message,
+      result: SPQueryResults[0],
+    };
+  } catch (err: any) {
+    console.error(err);
+    return {
+      code: 0,
+      errmsg: err.message,
+      result: [],
+    };
+  }
 }

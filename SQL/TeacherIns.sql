@@ -29,18 +29,18 @@ DECLARE EXIT HANDLER FOR SQLEXCEPTION
 BEGIN
 	GET DIAGNOSTICS CONDITION 1
     Rmessage = MESSAGE_TEXT;
-    SET RCode := 0;
+    SET Rcode := 0;
 	ROLLBACK;
 END;
 START TRANSACTION;
 
-SET RCode := 1;
+SET Rcode := 1;
 SET Rmessage := NULL;
 
 IF NOT EXISTS (SELECT 	country_id
 				FROM	countries
 				WHERE	country_id = PcountryId) THEN
-	SET RCode := 0,
+	SET Rcode := 0,
 		Rmessage := "Country does not exists";
 	ROLLBACK;
     LEAVE SP;
@@ -49,7 +49,7 @@ END IF;
 IF EXISTS (SELECT 	teacher_id
 			FROM	teachers
 			WHERE	teacher_email = Pemail) THEN
-	SET RCode := 0,
+	SET Rcode := 0,
 		Rmessage := "Teacher with this email registered";
 	ROLLBACK;
     LEAVE SP;
@@ -85,7 +85,7 @@ my_loop: LOOP
     IF NOT EXISTS (SELECT 	language_id
 					FROM	languages
 					WHERE	language_id = BlanguageId) THEN
-		SET RCode := 0,
+		SET Rcode := 0,
 			Rmessage := "Language does not exists";
 		ROLLBACK;
 		LEAVE SP;
@@ -95,7 +95,7 @@ my_loop: LOOP
     IF NOT EXISTS (SELECT 	language_level_id
 					FROM	language_levels
 					WHERE	language_level_id = BlanguageLevelId) THEN
-		SET RCode := 0,
+		SET Rcode := 0,
 			Rmessage := "Language level does not exists";
 		ROLLBACK;
 		LEAVE SP;
@@ -105,7 +105,7 @@ my_loop: LOOP
 				FROM	teacher_languages
                 WHERE	teacher_id = BteacherId
                 AND		language_id = BlanguageId) THEN
-		SET RCode := 0,
+		SET Rcode := 0,
 			Rmessage := "Repeated language";
 		ROLLBACK;
 		LEAVE SP;

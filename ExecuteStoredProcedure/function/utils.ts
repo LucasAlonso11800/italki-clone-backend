@@ -9,12 +9,14 @@ export const buildParams = (
 ): string => {
   let SPparams: string = "";
   if (params.length > 0) {
-    SPparams = params.map((p) => {
-      if (typeof p === "string") {
-        return '"' + p + '"';
-      }
-      return p;
-    }).join(',');
+    SPparams = params
+      .map((p) => {
+        if (typeof p === "string") {
+          return '"' + p + '"';
+        }
+        return p;
+      })
+      .join(",");
   }
 
   if (student_id_required) {
@@ -33,9 +35,9 @@ export const buildParams = (
   }
 
   if (SPparams) {
-    SPparams = SPparams.concat(", ", "1", ", ", '""');
+    SPparams = SPparams.concat(", ", "@Rcode", ", ", "@Rmessage");
   } else {
-    SPparams = '1, ""';
+    SPparams = '"@Rcode", "@Rmessage"';
   }
   return SPparams;
 };

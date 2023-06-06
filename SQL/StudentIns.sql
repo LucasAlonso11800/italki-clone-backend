@@ -15,19 +15,28 @@ DECLARE EXIT HANDLER FOR SQLEXCEPTION
 BEGIN
 	GET DIAGNOSTICS CONDITION 1
     Rmessage = MESSAGE_TEXT;
-    SET RCode := 0;
+    SET Rcode := 0;
 	ROLLBACK;
 END;
 START TRANSACTION;
 
-SET RCode := 1;
+SET Rcode := 1;
 SET Rmessage := NULL;
 
 IF NOT EXISTS (SELECT 	country_id
 				FROM	countries
 				WHERE	country_id = PcountryId) THEN
-	SET RCode := 0,
+	SET Rcode := 0,
 		Rmessage := "Country does not exists";
+	ROLLBACK;
+    LEAVE SP;
+END IF;
+
+IF EXISTS (SELECT 	student_id
+			FROM	students
+			WHERE	student_email = Pemail) THEN
+	SET Rcode := 0,
+		Rmessage := "Student with this email registered";
 	ROLLBACK;
     LEAVE SP;
 END IF;
