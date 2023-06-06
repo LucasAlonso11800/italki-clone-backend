@@ -12,6 +12,7 @@ import {
 } from "italki-clone-common";
 import { DB_HOST, DB_NAME, DB_PASSWORD, DB_USER } from "./env";
 import { SPList } from "./SPList";
+import { buildParams } from "./utils";
 
 const connection = mysql.createConnection({
   host: DB_HOST,
@@ -115,14 +116,15 @@ export const handler = async (
     }
 
     // Execute the stored procedure with the provided parameters
-    const { code, errmsg, result } = await callSP(
-      procedure,
+    const SPParams = buildParams(
       params,
       SP.student_id_required,
       student_id,
       SP.teacher_id_required,
       teacher_id
     );
+
+    const { code, errmsg, result } = await callSP(procedure, SPParams);
 
     // Close the database connection
     connection.end();
@@ -188,26 +190,9 @@ function checkSPExists(procedure: string): Promise<boolean> {
   });
 }
 
-function callSP(
-  procedure: string,
-  params: ParamType[],
-  student_id_required: boolean | undefined,
-  student_id: string | undefined,
-  teacher_id_required: boolean | undefined,
-  teacher_id: string | undefined
-): Promise<BodyType<any>> {
+function callSP(procedure: string, params: string): Promise<BodyType<any>> {
   return new Promise((resolve, reject) => {
-    const paramString = params.length > 0 ? params.join(",") : "";
-
-    let authParams = "";
-    if (student_id_required) {
-      authParams.concat(", ", student_id as string);
-    }
-    if (teacher_id_required) {
-      authParams.concat(", ", teacher_id as string);
-    }
-
-    const query = `CALL ${procedure}(${paramString}${authParams}, 1, "")`;
+    const query = `CALL ${procedure}(${params})`;
     console.log("MYSQL query", query);
 
     connection.query(query, (error, results: mysql.RowDataPacket[][]) => {
