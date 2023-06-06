@@ -263,6 +263,34 @@ describe("Input validations", () => {
     const result = await handler(event as any, {} as Context);
     expect(result).toEqual(expectedResponse);
   });
+  it("should return 400 status code and error messages if languages is invalid", async () => {
+    const event = {
+      body: JSON.stringify({
+        firstName: "Name",
+        lastName: "Name",
+        birthdate: "2000-01-01",
+        email: "mail@gmail.com",
+        gender: "M",
+        password: "passowrd",
+        country: 1,
+        professional: "Y",
+        description: "description",
+        experience: "experience",
+        methods: "methods",
+        languages: [{language_id: 1, language_level_id: 1}, {language_id: 2}]
+      }),
+    };
+    const expectedResponse = {
+      statusCode: 400,
+      body: JSON.stringify({
+        code: 0,
+        errmsg: "Invalid value for languages",
+        result: [],
+      }),
+    };
+    const result = await handler(event as any, {} as Context);
+    expect(result).toEqual(expectedResponse);
+  });
 });
 
 describe("API Calls", () => {

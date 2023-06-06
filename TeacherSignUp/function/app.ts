@@ -25,7 +25,6 @@ export const handler = async (
       gender,
       password,
       country,
-      startDate = new Date().toISOString().slice(0, 10),
       professional,
       description,
       experience,
@@ -202,7 +201,10 @@ export const handler = async (
       };
     }
     // Check if languages are valid
-    if (!languages) {
+    if (
+      !languages ||
+      !languages.every((lang: Language) => lang.language_id && lang.language_level_id)
+    ) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -214,12 +216,10 @@ export const handler = async (
     }
 
     // Transform the languages array into two strings with the ids separated by ";"
-    const languageIds = languages
-      .map((lang: Language) => lang.language_id)
-      .join(";");
-    const languageLevelIds = languages
-      .map((lang: Language) => lang.language_level_id)
-      .join(";");
+    const languageIds =
+      languages.map((lang: Language) => lang.language_id).join(";") + ";";
+    const languageLevelIds =
+      languages.map((lang: Language) => lang.language_level_id).join(";") + ";";
 
     // Call the stored procedure to insert the teacher into the database
     const teacherInsResponse = await internalAPICallDo(PATHS.services, {
@@ -232,7 +232,6 @@ export const handler = async (
         gender,
         hashedPassword,
         country,
-        startDate,
         professional,
         description,
         experience,
@@ -287,7 +286,6 @@ export const handler = async (
       }
     );
 
-    
     if (
       !generateJwtResponse.data ||
       generateJwtResponse.data.code !== 1 ||
@@ -311,7 +309,7 @@ export const handler = async (
     );
     if (
       !generateRefreshTokenResponse.data ||
-      generateRefreshTokenResponse.data.code !== 1 || 
+      generateRefreshTokenResponse.data.code !== 1 ||
       !generateRefreshTokenResponse.headers["refresh_token"]
     ) {
       return {
