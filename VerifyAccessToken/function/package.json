@@ -12,9 +12,8 @@
     "test": "npm run compile && npm run unit"
   },
   "dependencies": {
-    "esbuild": "^0.14.14",
     "aws-lambda": "^1.0.7",
-    "italki-clone-common": "^1.0.3",
+    "esbuild": "^0.14.14",
     "jsonwebtoken": "^9.0.0"
   },
   "devDependencies": {
