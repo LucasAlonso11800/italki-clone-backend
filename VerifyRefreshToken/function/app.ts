@@ -14,7 +14,7 @@ export const handler = async (
   try {
     // Retrieve the refresh token from the request
     const refreshToken = event.headers.authorization as string;
-    console.log('event.headers.authorization', refreshToken)
+    console.log("event.headers.authorization", refreshToken);
     // Validate the refresh token
     const decodedToken = jwt.verify(
       refreshToken,
@@ -45,18 +45,21 @@ export const handler = async (
     }
 
     // Generate JWT token
-    const generateJwtResponse = await internalAPICallDo(
-      PATHS.auth.generate_access_token,
-      {
+    const generateJwtResponse = await internalAPICallDo({
+      path: PATHS.auth.generate_access_token,
+      method: "POST",
+      body: {
         student_id: decodedToken.student_id,
         teacher_id: decodedToken.teacher_id,
-      }
-    );
-    console.log('generateJwtResponse', generateJwtResponse)
+      },
+    });
+    console.log("generateJwtResponse", generateJwtResponse);
+    
     if (
+      !generateJwtResponse.data ||
       generateJwtResponse.status !== 200 ||
-      generateJwtResponse.data.code !== 1 || 
-      !generateJwtResponse.headers['access_token']
+      generateJwtResponse.data.code !== 1 ||
+      !generateJwtResponse.headers["access_token"]
     ) {
       return {
         statusCode: 500,
