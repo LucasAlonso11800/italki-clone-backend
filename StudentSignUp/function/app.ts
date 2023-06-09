@@ -12,11 +12,18 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     // Retrieve the sign-up data from the request body
-    const { firstName, lastName, birthdate, email, gender, password, country } =
-      JSON.parse(event.body as string);
+    const {
+      first_name,
+      last_name,
+      birthdate,
+      email,
+      gender,
+      password,
+      country,
+    } = JSON.parse(event.body as string);
 
     // Check if the first name is valid
-    if (!firstName || firstName.length > 40) {
+    if (!first_name || first_name.length > 40) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -28,7 +35,7 @@ export const handler = async (
     }
 
     // Check if the last name is valid
-    if (!lastName || lastName.length > 40) {
+    if (!last_name || last_name.length > 40) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -108,17 +115,21 @@ export const handler = async (
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Call the stored procedure to store the student information
-    const studentInsResponse = await internalAPICallDo(PATHS.services, {
-      procedure: "StudentIns",
-      params: [
-        firstName,
-        lastName,
-        birthdate,
-        email,
-        gender,
-        hashedPassword,
-        country,
-      ],
+    const studentInsResponse = await internalAPICallDo({
+      path: PATHS.services,
+      method: "POST",
+      body: {
+        procedure: "StudentIns",
+        params: {
+          first_name,
+          last_name,
+          birthdate,
+          email,
+          gender,
+          password: hashedPassword,
+          country,
+        },
+      },
     });
 
     // Check if the stored procedure execution was successful
@@ -134,9 +145,13 @@ export const handler = async (
     }
 
     // Check if the student exists
-    const studentCheckResponse = await internalAPICallDo(PATHS.services, {
-      procedure: "StudentCheck",
-      params: [email],
+    const studentCheckResponse = await internalAPICallDo({
+      path: PATHS.services,
+      method: "POST",
+      body: {
+        procedure: "StudentCheck",
+        params: { email },
+      },
     });
 
     if (
@@ -157,12 +172,13 @@ export const handler = async (
     const { student_id } = studentCheckResponse.data.result[0];
 
     // Generate access token
-    const generateJwtResponse = await internalAPICallDo(
-      PATHS.auth.generate_access_token,
-      {
+    const generateJwtResponse = await internalAPICallDo({
+      path: PATHS.auth.generate_access_token,
+      method: "POST",
+      body: {
         student_id: student_id,
-      }
-    );
+      },
+    });
 
     if (
       !generateJwtResponse.data ||
@@ -180,15 +196,17 @@ export const handler = async (
     }
 
     // Generate refresh token
-    const generateRefreshTokenResponse = await internalAPICallDo(
-      PATHS.auth.generate_refresh_token,
-      {
+    const generateRefreshTokenResponse = await internalAPICallDo({
+      path: PATHS.auth.generate_refresh_token,
+      method: "POST",
+      body: {
         student_id: student_id,
-      }
-    );
+      },
+    });
+    
     if (
       !generateRefreshTokenResponse.data ||
-      generateRefreshTokenResponse.data.code !== 1 || 
+      generateRefreshTokenResponse.data.code !== 1 ||
       !generateRefreshTokenResponse.headers["refresh_token"]
     ) {
       return {
@@ -204,8 +222,8 @@ export const handler = async (
     return {
       statusCode: 200,
       headers: {
-          access_token: generateJwtResponse.headers["access_token"],
-          refresh_token: generateRefreshTokenResponse.headers["refresh_token"],
+        access_token: generateJwtResponse.headers["access_token"],
+        refresh_token: generateRefreshTokenResponse.headers["refresh_token"],
       },
       body: JSON.stringify({
         code: 1,
@@ -214,7 +232,7 @@ export const handler = async (
       }),
     };
   } catch (error: any) {
-    console.error(error)
+    console.error(error);
     return {
       statusCode: 500,
       body: JSON.stringify({

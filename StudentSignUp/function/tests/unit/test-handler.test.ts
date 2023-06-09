@@ -23,7 +23,7 @@ describe("Input validations", () => {
   it("should return 400 status code and error messages if last name is invalid", async () => {
     const event = {
       body: JSON.stringify({
-        firstName: 'Name'
+        first_name: 'Name'
       })
     };
     const expectedResponse = {
@@ -41,8 +41,8 @@ describe("Input validations", () => {
   it("should return 400 status code and error messages if birthdate is invalid", async () => {
     const event = {
       body: JSON.stringify({
-        firstName: 'Name',
-        lastName: 'Name'
+        first_name: 'Name',
+        last_name: 'Name'
       })
     };
     const expectedResponse = {
@@ -59,8 +59,8 @@ describe("Input validations", () => {
   it("should return 400 status code and error messages if birthdate is invalid", async () => {
     const event = {
       body: JSON.stringify({
-        firstName: 'Name',
-        lastName: 'Name',
+        first_name: 'Name',
+        last_name: 'Name',
         birthdate: '2000-01-01'
       })
     };
@@ -78,8 +78,8 @@ describe("Input validations", () => {
   it("should return 400 status code and error messages if gender is invalid", async () => {
     const event = {
       body: JSON.stringify({
-        firstName: 'Name',
-        lastName: 'Name',
+        first_name: 'Name',
+        last_name: 'Name',
         birthdate: '2000-01-01',
         email: 'mail@gmail.com'
       })
@@ -98,8 +98,8 @@ describe("Input validations", () => {
   it("should return 400 status code and error messages if password is invalid", async () => {
     const event = {
       body: JSON.stringify({
-        firstName: 'Name',
-        lastName: 'Name',
+        first_name: 'Name',
+        last_name: 'Name',
         birthdate: '2000-01-01',
         email: 'mail@gmail.com',
         gender: 'M'
@@ -119,8 +119,8 @@ describe("Input validations", () => {
   it("should return 400 status code and error messages if country is invalid", async () => {
     const event = {
       body: JSON.stringify({
-        firstName: 'Name',
-        lastName: 'Name',
+        first_name: 'Name',
+        last_name: 'Name',
         birthdate: '2000-01-01',
         email: 'mail@gmail.com',
         gender: 'M',
@@ -143,8 +143,8 @@ describe("Input validations", () => {
 describe("API Calls", () => {
   const validEvent: any = {
     body: JSON.stringify({
-      firstName: "John",
-      lastName: "Doe",
+      first_name: "John",
+      last_name: "Doe",
       birthdate: "1990-01-01",
       email: "john.doe@example.com",
       gender: "M",
