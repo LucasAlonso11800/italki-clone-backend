@@ -18,8 +18,8 @@ export const handler = async (
   try {
     // Retrieve the sign-up data from the request body
     const {
-      firstName,
-      lastName,
+      first_name,
+      last_name,
       birthdate,
       email,
       gender,
@@ -35,7 +35,7 @@ export const handler = async (
     } = JSON.parse(event.body as string);
 
     // Check if the first name is valid
-    if (!firstName || firstName.length > 40) {
+    if (!first_name || first_name.length > 40) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -47,7 +47,7 @@ export const handler = async (
     }
 
     // Check if the last name is valid
-    if (!lastName || lastName.length > 40) {
+    if (!last_name || last_name.length > 40) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -222,29 +222,33 @@ export const handler = async (
       languages.map((lang: Language) => lang.language_level_id).join(";") + ";";
 
     // Call the stored procedure to insert the teacher into the database
-    const teacherInsResponse = await internalAPICallDo(PATHS.services, {
-      procedure: "TeacherIns",
-      params: [
-        firstName,
-        lastName,
-        birthdate,
-        email,
-        gender,
-        hashedPassword,
-        country,
-        professional,
-        description,
-        experience,
-        methods,
-        image,
-        video,
-        languageIds,
-        languageLevelIds,
-      ],
+    const teacherInsResponse = await internalAPICallDo({
+        path: PATHS.services,
+        method: "POST",
+        body: {
+          procedure: "TeacherIns",
+          params: {
+            first_name,
+            last_name,
+            birthdate,
+            email,
+            gender,
+            password: hashedPassword,
+            country,
+            professional,
+            description,
+            experience,
+            methods,
+            image,
+            video,
+            language_ids: languageIds,
+            language_level_ids: languageLevelIds,
+          },
+        } 
     });
 
     // Check if the teacher was inserted successfully
-    if (teacherInsResponse.data.code !== 1) {
+    if (!teacherInsResponse.data || teacherInsResponse.data.code !== 1) {
       return {
         statusCode: 500,
         body: JSON.stringify({
@@ -256,9 +260,13 @@ export const handler = async (
     }
 
     // Check if the teacher exists
-    const teacherCheckResponse = await internalAPICallDo(PATHS.services, {
-      procedure: "TeacherCheck",
-      params: [email],
+    const teacherCheckResponse = await internalAPICallDo({
+      path: PATHS.services,
+      method: "POST",
+      body: {
+        procedure: "TeacherCheck",
+        params: {email},
+      }
     });
 
     if (
@@ -279,12 +287,13 @@ export const handler = async (
     const { teacher_id } = teacherCheckResponse.data.result[0];
 
     // Generate access token
-    const generateJwtResponse = await internalAPICallDo(
-      PATHS.auth.generate_access_token,
-      {
+    const generateJwtResponse = await internalAPICallDo({
+      path: PATHS.auth.generate_access_token,
+      method: "POST",
+      body: {
         teacher_id,
-      }
-    );
+      },
+    });
 
     if (
       !generateJwtResponse.data ||
@@ -301,12 +310,14 @@ export const handler = async (
       };
     }
     // Generate refresh token
-    const generateRefreshTokenResponse = await internalAPICallDo(
-      PATHS.auth.generate_refresh_token,
-      {
+    const generateRefreshTokenResponse = await internalAPICallDo({
+      path: PATHS.auth.generate_refresh_token,
+      method: "POST",
+      body: {
         teacher_id,
-      }
-    );
+      },
+    });
+    
     if (
       !generateRefreshTokenResponse.data ||
       generateRefreshTokenResponse.data.code !== 1 ||
