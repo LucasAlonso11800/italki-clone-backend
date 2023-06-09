@@ -1,5 +1,6 @@
 import { BodyType } from "italki-clone-common";
 import type { Connection, RowDataPacket } from "mysql2";
+type UnionType = string | number | null;
 
 export async function doQuery<T>(
   connection: Connection,
@@ -16,28 +17,61 @@ export async function doQuery<T>(
   });
 }
 
-export async function doesSPExist(
-  connection: Connection,
-  procedure: string
-): Promise<boolean> {
-  try {
-    const result: RowDataPacket[] = await doQuery(
-      connection,
-      `SHOW PROCEDURE STATUS WHERE name = '${procedure}'`
-    );
-    return result.length > 0;
-  } catch (err) {
-    throw new Error("Error checking SP existence");
-  }
-}
+const joinParams = (params: UnionType[]): string => {
+  return params
+    .map((p) => {
+      if (typeof p === "string") {
+        return '"' + p + '"';
+      }
+      return p;
+    })
+    .join(",");
+};
+
+const buildQuery = (
+  procedure: string,
+  params: UnionType[],
+  student_id: UnionType = null,
+  teacher_id: UnionType = null
+): string => {
+  student_id = student_id?.toString() || null;
+  teacher_id = teacher_id?.toString() || null;
+  let query = `CALL ${procedure}`;
+
+  let SPparams = joinParams(params);
+
+  if (student_id) {
+    if (SPparams) {
+      SPparams = SPparams.concat(", ", student_id);
+    } else {
+      SPparams = student_id;
+    }
+  };
+  if (teacher_id) {
+    if (SPparams) {
+      SPparams = SPparams.concat(", ", teacher_id);
+    } else {
+      SPparams = teacher_id;
+    }
+  };
+
+  query += params.length
+    ? `(${params}, @Rcode, @Rmessage);`
+    : "(@Rcode, @Rmessage)";
+
+  query += "SELECT @Rcode as 'code', @Rmessage as 'message';";
+  return query;
+};
 
 export async function callSP(
   connection: Connection,
   procedure: string,
-  params: string
+  params: UnionType[],
+  student_id: UnionType = null,
+  teacher_id: UnionType = null
 ): Promise<BodyType<any>> {
   try {
-    const query = `CALL ${procedure}(${params}); SELECT @Rcode as 'code', @Rmessage as 'message'`;
+    const query = buildQuery(procedure, params, student_id, teacher_id);
     console.log("MYSQL query", query);
     const results: RowDataPacket[][] = await doQuery(connection, query);
     console.log("DB results", results);

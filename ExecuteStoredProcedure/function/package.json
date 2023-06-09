@@ -11,9 +11,11 @@
     "test": "npm run compile && npm run unit"
   },
   "dependencies": {
+    "aws-sdk": "^2.1394.0",
     "axios": "^1.4.0",
     "esbuild": "^0.14.14",
     "italki-clone-common": "^1.0.3",
+    "moment": "^2.29.4",
     "mysql2": "^3.3.3"
   },
   "devDependencies": {
