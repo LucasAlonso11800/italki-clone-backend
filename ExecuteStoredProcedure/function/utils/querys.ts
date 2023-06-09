@@ -1,6 +1,5 @@
-import { BodyType } from "italki-clone-common";
+import { BodyType , UnionType} from "italki-clone-common";
 import type { Connection, RowDataPacket } from "mysql2";
-type UnionType = string | number | null;
 
 export async function doQuery<T>(
   connection: Connection,

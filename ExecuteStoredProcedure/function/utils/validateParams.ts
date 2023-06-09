@@ -1,12 +1,9 @@
 import { DynamoDB } from "aws-sdk";
-import { BodyType } from "italki-clone-common";
+import { BodyType, ParamType, UnionType } from "italki-clone-common";
 import moment from "moment";
-// import { ParamType } from "italki-clone-common";
 
 const dynamodb = new DynamoDB();
 
-type UnionType = string | number | null;
-type ParamType = { [key: string]: UnionType };
 type ReturnType = {
   requires_student_id: boolean;
   requires_teacher_id: boolean;
@@ -57,7 +54,7 @@ export async function validateParams(
             result: [],
           };
       }
-      orderedParams[order] = receivedParam;
+      orderedParams[order - 1] = receivedParam;
     }
 
     if (Item.requires_timestamp.BOOL) {
