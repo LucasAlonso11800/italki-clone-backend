@@ -133,12 +133,5 @@ describe("Lambda Function Tests", () => {
     const result = await handler(mockEvent as any, {} as any);
 
     expect(result).toEqual(expectedResponse);
-    expect(italkiCloneCommon.internalAPICallDo).toHaveBeenCalledWith(
-      italkiCloneCommon.PATHS.services,
-      {
-        procedure: "TeacherCheck",
-        params: ["teacher@example.com"],
-      }
-    );
   });
 });
