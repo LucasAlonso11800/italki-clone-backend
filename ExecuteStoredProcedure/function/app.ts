@@ -21,13 +21,13 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     // Extract the JWT from the request headers
-    const token = event.headers.authorization;
+    const token = event.headers.authorization as string;
     console.log("event.headers.authorization", token);
     // Retrieve the stored procedure name and parameters from the event
     const { procedure, params } = JSON.parse(event.body as string);
     console.log("procedure", procedure);
     console.log("params", params);
-    
+
     // Param validation with dynamo db
     const validateParamsResponse = await validateParams(procedure, params);
     console.log("validateParamsResponse", validateParamsResponse);
@@ -46,23 +46,20 @@ export const handler = async (
       };
     }
 
-    const {
-      orderedParams,
-      requires_student_id,
-      requires_teacher_id
-    } = validateParamsResponse.result[0];
+    const { orderedParams, requires_student_id, requires_teacher_id } =
+      validateParamsResponse.result[0];
 
     let student_id, teacher_id;
 
     // Verify token with verification lambda and validates if required ids are present
     if (requires_student_id || requires_teacher_id) {
-      const authResponse = await internalAPICallDo(
-        PATHS.auth.verify_access_token,
-        {},
-        {
+      const authResponse = await internalAPICallDo({
+        path: PATHS.auth.verify_access_token,
+        method: "POST",
+        headers: {
           authorization: token,
-        }
-      );
+        },
+      });
       console.log("authResponse", authResponse);
       if (
         authResponse.status !== 200 ||
