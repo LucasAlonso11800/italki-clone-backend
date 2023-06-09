@@ -4,14 +4,10 @@ import {
   Context,
 } from "aws-lambda";
 import mysql from "mysql2";
-import {
-  BodyType,
-  PATHS,
-  internalAPICallDo,
-} from "italki-clone-common";
+import { PATHS, internalAPICallDo } from "italki-clone-common";
 import { DB_HOST, DB_NAME, DB_PASSWORD, DB_USER } from "./env";
 import { SPList } from "./SPList";
-import { buildParams } from "./utils";
+import { buildParams, callSP, connectToMySQL, doesSPExist } from "./utils";
 
 let connection: mysql.Connection;
 
@@ -98,12 +94,13 @@ export const handler = async (
       user: DB_USER,
       password: DB_PASSWORD,
       database: DB_NAME,
+      multipleStatements: true,
     });
-    
-    await connectToDatabase();
+
+    await connectToMySQL(connection);
 
     // Check if the stored procedure exists
-    const exists = await checkSPExists(procedure);
+    const exists = await doesSPExist(connection, procedure);
 
     if (!exists) {
       return {
@@ -125,24 +122,17 @@ export const handler = async (
       teacher_id
     );
 
-    const { code, errmsg, result } = await callSP(procedure, SPParams);
+    const { code, errmsg, result } = await callSP(
+      connection,
+      procedure,
+      SPParams
+    );
 
     // Close the database connection
     connection.end();
 
-    if (code === 0) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          code,
-          errmsg,
-          result: [],
-        }),
-      };
-    }
-
     return {
-      statusCode: 200,
+      statusCode: code === 0 ? 400 : 200,
       body: JSON.stringify({
         code,
         errmsg,
@@ -163,71 +153,3 @@ export const handler = async (
     };
   }
 };
-
-function connectToDatabase(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    connection.connect((error) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve();
-      }
-    });
-  });
-}
-
-async function mysqlQuery<T>(query: string): Promise<T> {
-  return new Promise((resolve, reject) => {
-    connection.query(query, (error: any, results: T) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results);
-      }
-    });
-  });
-}
-
-function checkSPExists(procedure: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    connection.query(
-      `SHOW PROCEDURE STATUS WHERE name = '${procedure}'`,
-      (error, results: mysql.RowDataPacket[]) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(results.length > 0);
-        }
-      }
-    );
-  });
-}
-
-async function callSP(
-  procedure: string,
-  params: string
-): Promise<BodyType<any>> {
-  try {
-    const SPQuery = `CALL ${procedure}(${params})`;
-    console.log("MYSQL SPQuery", SPQuery);
-    const outParamsQuery = `SELECT @Rcode as 'code', @Rmessage as 'message'`;
-    const SPQueryResults = await mysqlQuery<mysql.RowDataPacket[][]>(SPQuery);
-    console.log("SPQueryResults", SPQueryResults);
-    const outParamsQueryResults = await mysqlQuery<mysql.RowDataPacket[]>(
-      outParamsQuery
-    );
-    console.log("outParamsQueryResults", outParamsQueryResults);
-    return {
-      code: outParamsQueryResults[0].code,
-      errmsg: outParamsQueryResults[0].message,
-      result: SPQueryResults[0],
-    };
-  } catch (err: any) {
-    console.error(err);
-    return {
-      code: 0,
-      errmsg: err.message,
-      result: [],
-    };
-  }
-}

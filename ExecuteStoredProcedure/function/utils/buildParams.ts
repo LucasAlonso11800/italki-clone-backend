@@ -1,23 +1,23 @@
 import { ParamType } from "italki-clone-common";
 
-export const buildParams = (
+const joinParams = (params: ParamType[]): string => {
+    return params.map((p) => {
+      if (typeof p === "string") {
+        return '"' + p + '"';
+      }
+      return p;
+    })
+    .join(",");
+};
+
+export function buildParams(
   params: ParamType[] = [],
-  student_id_required: boolean | undefined = false,
+  student_id_required: boolean = false,
   student_id: string = "",
-  teacher_id_required: boolean | undefined = false,
+  teacher_id_required: boolean = false,
   teacher_id: string = ""
-): string => {
-  let SPparams: string = "";
-  if (params.length > 0) {
-    SPparams = params
-      .map((p) => {
-        if (typeof p === "string") {
-          return '"' + p + '"';
-        }
-        return p;
-      })
-      .join(",");
-  }
+): string {
+  let SPparams = joinParams(params);
 
   if (student_id_required) {
     if (SPparams) {
@@ -37,7 +37,7 @@ export const buildParams = (
   if (SPparams) {
     SPparams = SPparams.concat(", ", "@Rcode", ", ", "@Rmessage");
   } else {
-    SPparams = '"@Rcode", "@Rmessage"';
+    SPparams = '@Rcode, @Rmessage';
   }
   return SPparams;
-};
+}
