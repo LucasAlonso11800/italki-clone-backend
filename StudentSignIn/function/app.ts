@@ -27,9 +27,13 @@ export const handler = async (
     }
 
     // Check if the student exists
-    const studentCheckResponse = await internalAPICallDo(PATHS.services, {
-      procedure: "StudentCheck",
-      params: [email],
+    const studentCheckResponse = await internalAPICallDo({
+      path: PATHS.services,
+      method: "POST",
+      body: {
+        procedure: "StudentCheck",
+        params: { email },
+      },
     });
 
     if (
@@ -62,14 +66,19 @@ export const handler = async (
     }
 
     // Generate access token
-    const generateJwtResponse = await internalAPICallDo(
-      PATHS.auth.generate_access_token,
-      {
+    const generateJwtResponse = await internalAPICallDo({
+      path: PATHS.auth.generate_access_token,
+      method: "POST",
+      body: {
         student_id: student.student_id,
-      }
-    );
+      },
+    });
 
-    if (!generateJwtResponse.data || generateJwtResponse.data.code !== 1) {
+    if (
+      !generateJwtResponse.data ||
+      generateJwtResponse.data.code !== 1 ||
+      !generateJwtResponse.headers["access_token"]
+    ) {
       return {
         statusCode: 500,
         body: JSON.stringify({
@@ -80,16 +89,18 @@ export const handler = async (
       };
     }
     // Generate refresh token
-    const generateRefreshTokenResponse = await internalAPICallDo(
-      PATHS.auth.generate_refresh_token,
-      {
+    const generateRefreshTokenResponse = await internalAPICallDo({
+      path: PATHS.auth.generate_refresh_token,
+      method: "POST",
+      body: {
         student_id: student.student_id,
-      }
-    );
+      },
+    });
 
     if (
       !generateRefreshTokenResponse.data ||
-      generateRefreshTokenResponse.data.code !== 1
+      generateRefreshTokenResponse.data.code !== 1 ||
+      !generateRefreshTokenResponse.headers["refresh_token"]
     ) {
       return {
         statusCode: 500,
@@ -104,8 +115,8 @@ export const handler = async (
     return {
       statusCode: 200,
       headers: {
-        access_token: generateJwtResponse.headers["token"],
-        refresh_token: generateRefreshTokenResponse.headers["token"],
+        access_token: generateJwtResponse.headers["access_token"],
+        refresh_token: generateRefreshTokenResponse.headers["refresh_token"],
       },
       body: JSON.stringify({
         code: 1,
