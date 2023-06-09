@@ -1,21 +1,6 @@
 import { BodyType , UnionType} from "italki-clone-common";
 import type { Connection, RowDataPacket } from "mysql2";
 
-export async function doQuery<T>(
-  connection: Connection,
-  query: string
-): Promise<T> {
-  return new Promise((resolve, reject) => {
-    connection.query(query, (error: any, results: T) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results);
-      }
-    });
-  });
-}
-
 const joinParams = (params: UnionType[]): string => {
   return params
     .map((p) => {
@@ -45,49 +30,52 @@ const buildQuery = (
     } else {
       SPparams = student_id;
     }
-  };
+  }
   if (teacher_id) {
     if (SPparams) {
       SPparams = SPparams.concat(", ", teacher_id);
     } else {
       SPparams = teacher_id;
     }
-  };
+  }
 
-  query += params.length
-    ? `(${params}, @Rcode, @Rmessage);`
-    : "(@Rcode, @Rmessage)";
+  query += SPparams.length
+    ? `(${SPparams}, @Rcode, @Rmessage);`
+    : "(@Rcode, @Rmessage);";
 
   query += "SELECT @Rcode as 'code', @Rmessage as 'message';";
   return query;
 };
 
-export async function callSP(
+export function callSP(
   connection: Connection,
   procedure: string,
   params: UnionType[],
   student_id: UnionType = null,
   teacher_id: UnionType = null
 ): Promise<BodyType<any>> {
-  try {
+  return new Promise((resolve, reject) => {
     const query = buildQuery(procedure, params, student_id, teacher_id);
     console.log("MYSQL query", query);
-    const results: RowDataPacket[][] = await doQuery(connection, query);
-    console.log("DB results", results);
-    if (results.length === 2) {
-      return {
-        code: results[1][0].code,
-        errmsg: results[1][0].message,
-        result: [],
-      };
-    }
-    return {
-      code: results[2][0].code,
-      errmsg: results[2][0].message,
-      result: results[0],
-    };
-  } catch (err: any) {
-    console.error(err);
-    throw new Error(err.message);
-  }
+    connection.query(query, (error: any, results: RowDataPacket[][]) => {
+      if (error) {
+        reject(error);
+      } else {
+        console.log("DB results", results);
+        if (results.length === 2) {
+          resolve({
+            code: results[1][0].code,
+            errmsg: results[1][0].message,
+            result: [],
+          });
+        }
+        resolve({
+          code: results[2][0].code,
+          errmsg: results[2][0].message,
+          result: results[0],
+        });
+      }
+    });
+  });
 }
+

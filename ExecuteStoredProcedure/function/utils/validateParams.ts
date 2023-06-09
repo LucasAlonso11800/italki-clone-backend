@@ -1,8 +1,6 @@
-import { DynamoDB } from "aws-sdk";
+import AWS from "aws-sdk";
 import { BodyType, ParamType, UnionType } from "italki-clone-common";
 import moment from "moment";
-
-const dynamodb = new DynamoDB();
 
 type ReturnType = {
   requires_student_id: boolean;
@@ -11,7 +9,7 @@ type ReturnType = {
 };
 
 export const VALIDATE_PARAMS_ERRORS = {
-    internal: "Error validating parameters"
+  internal: "Error validating parameters",
 };
 
 export async function validateParams(
@@ -19,14 +17,15 @@ export async function validateParams(
   params: ParamType
 ): Promise<BodyType<ReturnType>> {
   try {
-    const getItemParams: DynamoDB.GetItemInput = {
-      TableName: "SPMetadata",
-      Key: {
-        procedure: { S: procedure },
-      },
-    };
+    const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-    const { Item } = await dynamodb.getItem(getItemParams).promise();
+    const { Item } = await dynamodb.get({
+        TableName: "SPMetadata",
+        Key: {
+          procedure,
+        },
+      })
+      .promise();
 
     if (!Item) {
       return {
@@ -36,30 +35,28 @@ export async function validateParams(
       };
     }
 
-    const storedParameters = DynamoDB.Converter.unmarshall({
-      M: Item.params,
-    });
+    const storedParameters = Item.params;
     console.log("storedParameters", storedParameters);
 
     const orderedParams = [];
 
     for (const storedParam in storedParameters) {
-      const { name, order, required } = storedParameters[storedParam];
-      const receivedParam = params[name];
+      const { order, required } = storedParameters[storedParam];
+      const receivedParam = params[storedParam];
 
       if (required && !receivedParam) {
         return {
-            code: 0,
-            errmsg: `Required parameter "${name}" is missing.`,
-            result: [],
-          };
+          code: 0,
+          errmsg: `Required parameter "${storedParam}" is missing.`,
+          result: [],
+        };
       }
       orderedParams[order - 1] = receivedParam;
     }
 
     if (Item.requires_timestamp.BOOL) {
-        orderedParams.push(moment().format('YYYY-MM-DD HH:mm:ss.SSS'))
-    };
+      orderedParams.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
+    }
 
     return {
       code: 1,
@@ -73,10 +70,11 @@ export async function validateParams(
       ],
     };
   } catch (error) {
+    console.error(error);
     return {
       code: 0,
       errmsg: VALIDATE_PARAMS_ERRORS.internal,
       result: [],
     };
   }
-}
+} 

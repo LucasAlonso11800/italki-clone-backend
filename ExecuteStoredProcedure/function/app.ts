@@ -4,14 +4,12 @@ import {
   Context,
 } from "aws-lambda";
 import mysql from "mysql2";
-import { PATHS, internalAPICallDo } from "italki-clone-common";
-import { DB_HOST, DB_NAME, DB_PASSWORD, DB_USER } from "./env";
 import {
-  VALIDATE_PARAMS_ERRORS,
-  callSP,
-  connectToMySQL,
-  validateParams,
-} from "./utils";
+  PATHS,
+  internalAPICallDo,
+} from "italki-clone-common";
+import { DB_HOST, DB_NAME, DB_PASSWORD, DB_USER } from "./env";
+import { VALIDATE_PARAMS_ERRORS, callSP, connectToMySQL, validateParams } from "./utils";
 
 let connection: mysql.Connection;
 
@@ -30,6 +28,7 @@ export const handler = async (
 
     // Param validation with dynamo db
     const validateParamsResponse = await validateParams(procedure, params);
+    // const validateParamsResponse = {code: 1, errmsg: "", result: [{orderedParams: [], requires_student_id: false, requires_teacher_id: false}]};
     console.log("validateParamsResponse", validateParamsResponse);
 
     if (validateParamsResponse.code === 0) {
