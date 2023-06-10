@@ -19,7 +19,8 @@ export async function validateParams(
   try {
     const dynamodb = new AWS.DynamoDB.DocumentClient();
 
-    const { Item } = await dynamodb.get({
+    const { Item } = await dynamodb
+      .get({
         TableName: "SPMetadata",
         Key: {
           procedure,
@@ -41,13 +42,20 @@ export async function validateParams(
     const orderedParams = [];
 
     for (const storedParam in storedParameters) {
-      const { order, required } = storedParameters[storedParam];
+      const { order, required, type } = storedParameters[storedParam];
       const receivedParam = params[storedParam];
 
       if (required && !receivedParam) {
         return {
           code: 0,
-          errmsg: `Required parameter "${storedParam}" is missing.`,
+          errmsg: `Required parameter '${storedParam}' is missing.`,
+          result: [],
+        };
+      }
+      if (type !== typeof receivedParam) {
+        return {
+          code: 0,
+          errmsg: `Unexpected type '${typeof receivedParam}' for parameter '${storedParam}'. Expected '${type}'`,
           result: [],
         };
       }
@@ -77,4 +85,4 @@ export async function validateParams(
       result: [],
     };
   }
-} 
+}
