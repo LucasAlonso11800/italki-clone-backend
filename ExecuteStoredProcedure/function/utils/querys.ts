@@ -1,16 +1,16 @@
 import { BodyType , UnionType} from "italki-clone-common";
 import type { Connection, RowDataPacket } from "mysql2";
 
-const joinParams = (params: UnionType[]): string => {
-  return params
-    .map((p) => {
-      if (typeof p === "string") {
-        return '"' + p + '"';
-      }
-      return p;
-    })
-    .join(",");
-};
+const joinParams = (params: UnionType[]): string => params.reduce((acc: string, param, index) => {
+  let result = '';
+  if (typeof param === 'string') {
+      result += `"${param}"`
+  } else {
+      result += param
+  }
+  if (index < params.length -1) result += ',' 
+  return acc + result;
+}, '');
 
 const buildQuery = (
   procedure: string,

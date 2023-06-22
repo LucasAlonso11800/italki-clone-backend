@@ -48,8 +48,6 @@ export const handler = async (
     }
     // Param validation with dynamo db
     const validateParamsResponse = await validateParams(procedure, params);
-    // const validateParamsResponse = {code: 1, errmsg: "", result: [{orderedParams: [], requires_student_id: false, requires_teacher_id: false}]};
-    console.log("validateParamsResponse", validateParamsResponse);
 
     if (validateParamsResponse.code === 0) {
       return {

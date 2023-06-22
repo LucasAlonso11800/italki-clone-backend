@@ -71,6 +71,7 @@ export async function validateParams(
       orderedParams.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
     }
 
+    console.log('OrderedParams', orderedParams)
     return {
       code: 1,
       errmsg: "",
