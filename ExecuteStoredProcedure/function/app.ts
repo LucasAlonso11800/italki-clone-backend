@@ -21,11 +21,31 @@ export const handler = async (
     // Extract the JWT from the request headers
     const token = event.headers.authorization as string;
     console.log("event.headers.authorization", token);
-    // Retrieve the stored procedure name and parameters from the event
-    const { procedure, params } = JSON.parse(event.body as string);
-    console.log("procedure", procedure);
-    console.log("params", params);
 
+    // Retrieve the stored procedure name and parameters from the event
+    console.log("event", event);
+    const { procedure, params } = JSON.parse(event.body as string);
+
+    if (!procedure){
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Missing procedure",
+          result: [],
+        }),
+      };
+    }
+    if (!params){
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          code: 0,
+          errmsg: "Missing params",
+          result: [],
+        }),
+      };
+    }
     // Param validation with dynamo db
     const validateParamsResponse = await validateParams(procedure, params);
     // const validateParamsResponse = {code: 1, errmsg: "", result: [{orderedParams: [], requires_student_id: false, requires_teacher_id: false}]};
