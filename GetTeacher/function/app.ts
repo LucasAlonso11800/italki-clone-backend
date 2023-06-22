@@ -59,8 +59,8 @@ export const handler = async (
         message: "",
         result: [{
           ...teacherInfo.data.result[0],
-          reviews: teacherReviews.data.result,
-          lessons: teacherLessons.data.result
+          teacher_reviews: teacherReviews.data.result,
+          teacher_lessons: teacherLessons.data.result
         }],
       }),
     };

@@ -15,25 +15,35 @@ END;
 SET Rcode := 1;
 SET Rmessage := NULL;
 
-SELECT 	teacher_id, 
-		teacher_first_name, 
-        teacher_last_name, 
-        teacher_birthdate, 
-        teacher_description, 
-        teacher_experience, 
-        teacher_methods, 
-        teacher_email, 
-        teacher_password, 
-        teacher_gender, 
-        teacher_image, 
-        teacher_video, 
-        teacher_professional, 
-        teacher_startdate, 
-        t.country_id,
-		country_name
-FROM 	teachers t
-JOIN	countries c
-	ON	c.country_id = t.country_id
-WHERE 	teacher_id = PteacherId;
+SELECT 
+    t.teacher_id,
+    t.teacher_first_name,
+    t.teacher_last_name,
+    t.teacher_birthdate,
+    t.teacher_description,
+    t.teacher_experience,
+    t.teacher_methods,
+    t.teacher_email,
+    t.teacher_password,
+    t.teacher_gender,
+    t.teacher_image,
+    t.teacher_video,
+    t.teacher_professional,
+    t.teacher_startdate,
+    t.country_id,
+    c.country_name,
+    AVG(tr.teacher_review_rating) AS average_rating,
+    COUNT(DISTINCT l.lesson_id) AS total_lessons,
+    COUNT(DISTINCT l.student_id) AS total_students
+FROM
+    teachers t
+    JOIN countries c ON c.country_id = t.country_id
+    LEFT JOIN teacher_reviews tr ON tr.teacher_id = t.teacher_id
+    LEFT JOIN lessons_posts lp ON lp.teacher_id = t.teacher_id
+    LEFT JOIN lessons l ON l.lesson_post_id = lp.lesson_post_id
+WHERE
+    t.teacher_id = PteacherId
+GROUP BY
+    t.teacher_id;
 
 END

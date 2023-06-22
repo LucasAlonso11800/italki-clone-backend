@@ -62,6 +62,7 @@ export function callSP(
         reject(error);
       } else {
         console.log("DB results", results);
+        console.log("DB results length", results.length);
         if (results.length === 2) {
           resolve({
             code: results[1][0].code,
