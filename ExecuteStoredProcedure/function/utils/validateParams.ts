@@ -45,13 +45,18 @@ export async function validateParams(
       const { order, required, type } = storedParameters[storedParam];
       const receivedParam = params[storedParam];
 
-      if (required && !receivedParam) {
+      if (!receivedParam && required) {
         return {
           code: 0,
           errmsg: `Required parameter '${storedParam}' is missing.`,
           result: [],
         };
       }
+      if (!receivedParam && !required) {
+        orderedParams[order - 1] = null;
+        continue;
+      }
+
       if (type !== typeof receivedParam) {
         return {
           code: 0,
