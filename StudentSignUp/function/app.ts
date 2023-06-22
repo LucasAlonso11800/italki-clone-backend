@@ -12,6 +12,8 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     // Retrieve the sign-up data from the request body
+    console.log('event.body', event.body);
+
     const {
       first_name,
       last_name,
