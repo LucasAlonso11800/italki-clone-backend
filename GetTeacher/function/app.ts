@@ -19,14 +19,14 @@ export const handler = async (
           result: [],
         }),
       };
-    const teacherId = event.pathParameters.id;
+    const teacher_id = event.pathParameters.id;
 
     const teacherInfoGet = internalAPICallDo({
       method: "POST",
       path: PATHS.services,
       body: {
         procedure: "TeacherInfoGet",
-        params: { teacherId },
+        params: { teacher_id },
       },
     });
     const teacherReviewGet = internalAPICallDo({
@@ -34,7 +34,7 @@ export const handler = async (
       path: PATHS.services,
       body: {
         procedure: "TeacherReviewGet",
-        params: { teacherId },
+        params: { teacher_id },
       },
     });
 
@@ -43,7 +43,7 @@ export const handler = async (
       path: PATHS.services,
       body: {
         procedure: "TeacherLessonGet",
-        params: { teacherId },
+        params: { teacher_id },
       },
     });
 
