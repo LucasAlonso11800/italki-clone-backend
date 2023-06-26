@@ -24,6 +24,7 @@ SELECT
     t.teacher_about_me,
     t.teacher_me_as_a_teacher,
     t.teacher_teaching_style,
+    t.teacher_living_in,
     t.teacher_email,
     t.teacher_gender,
     t.teacher_image,
@@ -32,7 +33,9 @@ SELECT
     t.teacher_startdate,
     t.country_id,
     c.country_name,
+    c.country_image,
     AVG(tr.teacher_review_rating) AS average_rating,
+    COUNT(DISTINCT tr.teacher_review_id) as total_reviews,
     COUNT(DISTINCT l.lesson_id) AS total_lessons,
     COUNT(DISTINCT l.student_id) AS total_students
 FROM

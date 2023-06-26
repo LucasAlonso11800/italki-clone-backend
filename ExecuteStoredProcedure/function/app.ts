@@ -4,12 +4,14 @@ import {
   Context,
 } from "aws-lambda";
 import mysql from "mysql2";
-import {
-  PATHS,
-  internalAPICallDo,
-} from "italki-clone-common";
+import { PATHS, internalAPICallDo } from "italki-clone-common";
 import { DB_HOST, DB_NAME, DB_PASSWORD, DB_USER } from "./env";
-import { VALIDATE_PARAMS_ERRORS, callSP, connectToMySQL, validateParams } from "./utils";
+import {
+  VALIDATE_PARAMS_ERRORS,
+  callSP,
+  connectToMySQL,
+  validateParams,
+} from "./utils";
 
 let connection: mysql.Connection;
 
@@ -26,7 +28,7 @@ export const handler = async (
     console.log("event", event);
     const { procedure, params } = JSON.parse(event.body as string);
 
-    if (!procedure){
+    if (!procedure) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -36,7 +38,7 @@ export const handler = async (
         }),
       };
     }
-    if (!params){
+    if (!params) {
       return {
         statusCode: 400,
         body: JSON.stringify({
@@ -48,6 +50,7 @@ export const handler = async (
     }
     // Param validation with dynamo db
     const validateParamsResponse = await validateParams(procedure, params);
+    console.log("validateParamsResponse", validateParamsResponse);
 
     if (validateParamsResponse.code === 0) {
       return {

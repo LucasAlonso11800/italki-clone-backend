@@ -32,11 +32,15 @@ SELECT 	teacher_review_id,
         student_image,
         teacher_review_date, 
         teacher_review_text, 
-        teacher_review_is_pick
+        teacher_review_is_pick,
+        count(l.lesson_id) as 'student_total_lessons'
 FROM 	teacher_reviews tr
-JOIN	students s
+LEFT OUTER JOIN	students s
 	ON	s.student_id = tr.student_id
+LEFT OUTER JOIN	lessons l
+	ON	l.student_id = s.student_id
 WHERE	teacher_id = PteacherId
+GROUP BY l.student_id
 ORDER 
 	BY 	FIELD(teacher_review_is_pick,'Y','N'), teacher_review_date desc
 LIMIT 	Boffset, 10;

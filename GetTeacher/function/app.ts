@@ -47,10 +47,20 @@ export const handler = async (
       },
     });
 
-    const [teacherInfo, teacherReviews, teacherLessons] = await Promise.all([
+    const teacherLanguageGet = internalAPICallDo({
+      method: "POST",
+      path: PATHS.services,
+      body: {
+        procedure: "TeacherLanguageGet",
+        params: { teacher_id },
+      },
+    });
+
+    const [teacherInfo, teacherReviews, teacherLessons, teacherLanguages] = await Promise.all([
       teacherInfoGet,
       teacherReviewGet,
       teacherLessonGet,
+      teacherLanguageGet
     ]);
     return {
       statusCode: 200,
@@ -60,7 +70,8 @@ export const handler = async (
         result: [{
           ...teacherInfo.data.result[0],
           teacher_reviews: teacherReviews.data.result,
-          teacher_lessons: teacherLessons.data.result
+          teacher_lessons: teacherLessons.data.result,
+          teacher_languages: teacherLanguages.data.result
         }],
       }),
     };

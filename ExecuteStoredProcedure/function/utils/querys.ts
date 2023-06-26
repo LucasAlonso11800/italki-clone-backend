@@ -69,12 +69,13 @@ export function callSP(
             errmsg: results[1][0].message,
             result: [],
           });
+        } else {
+          resolve({
+            code: results[2][0].code,
+            errmsg: results[2][0].message,
+            result: results[0],
+          });
         }
-        resolve({
-          code: results[2][0].code,
-          errmsg: results[2][0].message,
-          result: results[0],
-        });
       }
     });
   });
