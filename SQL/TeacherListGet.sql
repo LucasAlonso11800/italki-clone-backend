@@ -1,6 +1,6 @@
 CREATE DEFINER=`root`@`%` PROCEDURE `TeacherListGet`(
-	IN	Ppage			int,
     IN	PlanguageName 	varchar(20),
+	IN	Ppage			int,
 	OUT Rcode 			int,
     OUT Rmessage 		varchar(100)
 )
