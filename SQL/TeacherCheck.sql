@@ -16,7 +16,8 @@ END;
 SET Rcode := 1;
 SET Rmessage := NULL;
 
-SELECT 	teacher_id
+SELECT 	teacher_id,
+		teacher_password as 'password'
 FROM	teachers
 WHERE	teacher_email = Pemail;
 
