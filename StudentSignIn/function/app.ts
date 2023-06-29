@@ -35,7 +35,7 @@ export const handler = async (
         params: { email },
       },
     });
-
+    console.log('studentCheckResponse', studentCheckResponse.data)
     if (
       !studentCheckResponse.data ||
       studentCheckResponse.data.code !== 1 ||
@@ -53,6 +53,7 @@ export const handler = async (
 
     // Verify the password
     const student = studentCheckResponse.data.result[0];
+
     const passwordMatch = await bcrypt.compare(password, student.password);
     if (!passwordMatch) {
       return {
