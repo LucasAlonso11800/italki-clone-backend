@@ -35,7 +35,7 @@ export const handler = async (
         params: { email },
       },
     });
-    console.log('studentCheckResponse', studentCheckResponse.data)
+    console.log("studentCheckResponse", studentCheckResponse.data);
     if (
       !studentCheckResponse.data ||
       studentCheckResponse.data.code !== 1 ||
@@ -55,6 +55,7 @@ export const handler = async (
     const student = studentCheckResponse.data.result[0];
 
     const passwordMatch = await bcrypt.compare(password, student.password);
+    
     if (!passwordMatch) {
       return {
         statusCode: 401,

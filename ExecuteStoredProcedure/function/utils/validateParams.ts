@@ -67,7 +67,7 @@ export async function validateParams(
       orderedParams[order - 1] = receivedParam;
     }
 
-    if (Item.requires_timestamp.BOOL) {
+    if (Item.requires_timestamp) {
       orderedParams.push(moment().format("YYYY-MM-DD HH:mm:ss.SSS"));
     }
 
@@ -76,8 +76,8 @@ export async function validateParams(
       errmsg: "",
       result: [
         {
-          requires_student_id: Boolean(Item.requires_student_id.BOOL),
-          requires_teacher_id: Boolean(Item.requires_teacher_id.BOOL),
+          requires_student_id: Item.requires_student_id,
+          requires_teacher_id: Item.requires_teacher_id,
           orderedParams,
         },
       ],

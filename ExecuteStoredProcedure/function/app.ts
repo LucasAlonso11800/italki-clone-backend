@@ -80,7 +80,7 @@ export const handler = async (
           authorization: token,
         },
       });
-      console.log("authResponse", authResponse);
+      console.log("authResponse", authResponse.data);
       if (
         authResponse.status !== 200 ||
         authResponse.data.code !== 1 ||

@@ -140,7 +140,7 @@ export const handler = async (
         statusCode: 500,
         body: JSON.stringify({
           code: 0,
-          errmsg: "Error creating the student",
+          errmsg: studentInsResponse.data.errmsg,
           result: [],
         }),
       };
