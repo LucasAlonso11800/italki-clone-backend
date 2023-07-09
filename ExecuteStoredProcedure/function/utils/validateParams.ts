@@ -5,6 +5,7 @@ import moment from "moment";
 type ReturnType = {
   requires_student_id: boolean;
   requires_teacher_id: boolean;
+  requires_login: boolean;
   orderedParams: UnionType[];
 };
 
@@ -78,6 +79,7 @@ export async function validateParams(
         {
           requires_student_id: Item.requires_student_id,
           requires_teacher_id: Item.requires_teacher_id,
+          requires_login: Item.requires_login,
           orderedParams,
         },
       ],

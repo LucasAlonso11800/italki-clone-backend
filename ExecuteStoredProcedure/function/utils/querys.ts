@@ -14,31 +14,11 @@ const joinParams = (params: UnionType[]): string => params.reduce((acc: string, 
 
 const buildQuery = (
   procedure: string,
-  params: UnionType[],
-  student_id: UnionType = null,
-  teacher_id: UnionType = null
+  params: UnionType[]
 ): string => {
-  student_id = student_id?.toString() || null;
-  teacher_id = teacher_id?.toString() || null;
   let query = `CALL ${procedure}`;
 
   let SPparams = joinParams(params);
-
-  if (student_id) {
-    if (SPparams) {
-      SPparams = SPparams.concat(", ", student_id);
-    } else {
-      SPparams = student_id;
-    }
-  }
-  if (teacher_id) {
-    if (SPparams) {
-      SPparams = SPparams.concat(", ", teacher_id);
-    } else {
-      SPparams = teacher_id;
-    }
-  }
-
   query += SPparams.length
     ? `(${SPparams}, @Rcode, @Rmessage);`
     : "(@Rcode, @Rmessage);";
@@ -50,12 +30,10 @@ const buildQuery = (
 export function callSP(
   connection: Connection,
   procedure: string,
-  params: UnionType[],
-  student_id: UnionType = null,
-  teacher_id: UnionType = null
+  params: UnionType[]
 ): Promise<BodyType<any>> {
   return new Promise((resolve, reject) => {
-    const query = buildQuery(procedure, params, student_id, teacher_id);
+    const query = buildQuery(procedure, params);
     console.log("MYSQL query", query);
     connection.query(query, (error: any, results: RowDataPacket[][]) => {
       if (error) {

@@ -66,13 +66,17 @@ export const handler = async (
       };
     }
 
-    const { orderedParams, requires_student_id, requires_teacher_id } =
-      validateParamsResponse.result[0];
+    const {
+      orderedParams,
+      requires_student_id,
+      requires_teacher_id,
+      requires_login,
+    } = validateParamsResponse.result[0];
 
     let student_id, teacher_id;
 
     // Verify token with verification lambda and validates if required ids are present
-    if (requires_student_id || requires_teacher_id) {
+    if (requires_login) {
       const authResponse = await internalAPICallDo({
         path: PATHS.auth.verify_access_token,
         method: "POST",
@@ -98,19 +102,24 @@ export const handler = async (
 
       student_id = authResponse.data.result[0].student_id;
       teacher_id = authResponse.data.result[0].teacher_id;
-    }
-    const unauthenticatedStudent = !student_id && requires_student_id;
-    const unauthenticatedTeacher = !teacher_id && requires_teacher_id;
 
-    if (unauthenticatedStudent || unauthenticatedTeacher) {
-      return {
-        statusCode: 401,
-        body: JSON.stringify({
-          code: 0,
-          errmsg: "Invalid token",
-          result: [],
-        }),
-      };
+      if (!student_id && !teacher_id) {
+        return {
+          statusCode: 401,
+          body: JSON.stringify({
+            code: 0,
+            errmsg: "Invalid token",
+            result: [],
+          }),
+        };
+      }
+
+      if (requires_student_id && student_id){
+        orderedParams.push(student_id)
+      }
+      if (requires_teacher_id && teacher_id){
+        orderedParams.push(teacher_id)
+      }
     }
 
     // Connect to the database
@@ -128,9 +137,7 @@ export const handler = async (
     const { code, errmsg, result } = await callSP(
       connection,
       procedure,
-      orderedParams,
-      student_id,
-      teacher_id
+      orderedParams
     );
 
     // Close the database connection
