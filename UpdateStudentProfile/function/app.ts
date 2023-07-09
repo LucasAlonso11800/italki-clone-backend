@@ -58,20 +58,21 @@ export const handler = async (
     };
   }
 
-  const bucketName = "italki-clone-students";
-  const key = `${email}.jpg`;
-  const imageData = Buffer.from(image, 'base64')
-  // Set up the parameters for S3 upload
-  const params = {
-    Bucket: bucketName,
-    Key: key,
-    Body: imageData,
-    ContentType: "image/jpg",
-  };
-
-  let imageUrl;
+  
   try {
-    if (image) {
+    let imageUrl;
+    const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+    if (image && base64regex.test(image)) {
+      const bucketName = "italki-clone-students";
+      const key = `${email}.jpg`;
+      const imageData = Buffer.from(image, 'base64')
+      // Set up the parameters for S3 upload
+      const params = {
+        Bucket: bucketName,
+        Key: key,
+        Body: imageData,
+        ContentType: "image/jpg",
+      };
       await s3.upload(params).promise();
       imageUrl = `https://${bucketName}.s3-us-west-2.amazonaws.com/${key}`;
     }
