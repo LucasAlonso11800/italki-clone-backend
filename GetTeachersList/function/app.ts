@@ -48,8 +48,8 @@ export const handler = async (
       teacherIdsGet,
     ]);
 
-    console.log("teacherList", teacherList);
-    console.log("teacherIds", teacherIds);
+    console.log("teacherList", teacherList.data);
+    console.log("teacherIds", teacherIds.data);
     const response = [];
     for await (const teacher of teacherList.data.result) {
       const languages = (
