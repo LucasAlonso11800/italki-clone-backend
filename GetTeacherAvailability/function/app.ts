@@ -11,9 +11,29 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     const token = event.headers.authorization as string;
-    const { teacher_id, date_from, date_to } = JSON.parse(event.body as string);
-    let decoded_teacher_id;
+    console.log("event.queryStringParameters", event.queryStringParameters);
+    if (!event.queryStringParameters)
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          code: 0,
+          message: "Missing dates",
+          result: [],
+        }),
+      };
 
+    const { teacher_id, date_from, date_to } = event.queryStringParameters;
+    if (!date_from || !date_to)
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          code: 0,
+          message: "Missing dates",
+          result: [],
+        }),
+      };
+
+    let decoded_teacher_id;
     const diff =
       (new Date(date_to).getTime() - new Date(date_from).getTime()) /
       (1000 * 3600 * 24);
@@ -82,9 +102,9 @@ export const handler = async (
       body: {
         procedure: "TeacherAvailabilityGet",
         params: {
-          teacher_id: decoded_teacher_id || teacher_id,
-          date_from,
-          date_to,
+          teacher_id: decoded_teacher_id
+            ? decoded_teacher_id.toString()
+            : teacher_id,
         },
       },
     });
@@ -94,7 +114,9 @@ export const handler = async (
       body: {
         procedure: "TeacherBookedLessonGet",
         params: {
-          teacher_id: decoded_teacher_id || teacher_id,
+          teacher_id: decoded_teacher_id
+            ? decoded_teacher_id.toString()
+            : teacher_id,
           date_from,
           date_to,
         },
@@ -105,7 +127,18 @@ export const handler = async (
       teacherAvailabilityGet,
       teacherBookedLessonGet,
     ]);
-
+    if (!teacherAvailability.data || teacherAvailability.data.code === 0) {
+      return {
+        statusCode: teacherAvailability.status,
+        body: JSON.stringify(teacherAvailability.data),
+      };
+    }
+    if (!teacherBookedLessons.data || teacherBookedLessons.data.code === 0) {
+      return {
+        statusCode: teacherBookedLessons.status,
+        body: JSON.stringify(teacherBookedLessons.data),
+      };
+    }
     const result = checkAvailability(
       teacherAvailability.data.result,
       teacherBookedLessons.data.result
@@ -119,14 +152,10 @@ export const handler = async (
       }),
     };
   } catch (err: any) {
-    console.error(err);
+    console.error(err.response);
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        code: 0,
-        message: err.message,
-        result: [],
-      }),
+      body: JSON.stringify(err.response.data),
     };
   }
 };
@@ -166,11 +195,11 @@ function checkAvailability(
         teacher_availability_day_of_week:
           availableHour.teacher_availability_day_of_week,
         teacher_availability_start_time: startTime
-          .toLocaleString()
-          .substring(10, 15),
+          .toISOString()
+          .substring(11, 16),
         teacher_availability_end_time: intervalEnd
-          .toLocaleString()
-          .substring(10, 15),
+          .toISOString()
+          .substring(11, 16),
         is_booked: false,
       };
       availableIntervals.push(interval);
@@ -193,7 +222,7 @@ function checkAvailability(
           getDayOfWeek(bookedHour.lesson_datetime) &&
         availableInterval.teacher_availability_start_time ===
           getTime(bookedHour.lesson_datetime);
-          
+
       if (isBooked) {
         availableInterval.is_booked = true;
       }

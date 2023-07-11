@@ -22,6 +22,8 @@ SELECT 	teacher_availability_id,
         teacher_availability_start_time, 
         teacher_availability_end_time
 FROM 	teacher_availability
-WHERE 	teacher_id = PteacherId;
+WHERE 	teacher_id = PteacherId
+ORDER 
+	BY 	FIELD(teacher_availability_day_of_week,'MO','TU', 'WE', 'TH', 'FR', 'SA', 'SU');
 
 END
