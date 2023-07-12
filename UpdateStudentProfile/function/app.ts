@@ -60,13 +60,13 @@ export const handler = async (
 
   
   try {
-    let imageUrl;
+    const bucketName = "italki-clone-students";
+    const key = `${email}.jpg`;
+    const imageUrl = `https://${bucketName}.s3-us-west-2.amazonaws.com/${key}`;
     const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
     if (image && base64regex.test(image)) {
-      const bucketName = "italki-clone-students";
-      const key = `${email}.jpg`;
-      const imageData = Buffer.from(image, 'base64')
       // Set up the parameters for S3 upload
+      const imageData = Buffer.from(image, 'base64');
       const params = {
         Bucket: bucketName,
         Key: key,
@@ -74,7 +74,6 @@ export const handler = async (
         ContentType: "image/jpg",
       };
       await s3.upload(params).promise();
-      imageUrl = `https://${bucketName}.s3-us-west-2.amazonaws.com/${key}`;
     }
     const response = await internalAPICallDo({
       method: "POST",
